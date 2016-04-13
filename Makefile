@@ -13,3 +13,8 @@ main.o: main.cpp
 
 clean:
 	rm *.o accel
+
+#install: install-files
+#    groupadd -f --system gpio
+#    chgrp gpio $(DESTDIR)/bin/gpio-admin
+#    chmod u=rwxs,g=rx,o= $(DESTDIR)/bin/gpio-admin
