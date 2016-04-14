@@ -24,7 +24,6 @@ Distributed as-is; no warranty is given. Which is probably good, because I'm a r
 #include "SFE_LSM9DS0.h"
 #include <fstream>
 
-//#define GNUPLOT_ENABLE_PTY //not working?
 #include "gnuplot-iostream.h"
 
 using namespace std;
@@ -87,11 +86,12 @@ int main()
 {
   //Gnuplot gp(stdout);
   //Gnuplot gp;
-  //Gnuplot gp("tee out.gp | gnuplot -persist");
+  //Gnuplot gp(fopen("script.gp", "w"));
+  Gnuplot gp("tee out.gp | gnuplot");
 
-  //gp << "set terminal png"<<endl;
-  //gp << "set output out.png"<<endl;
-  //cout << "DEBUG: gp configured\n";
+  gp << "set terminal png\n";
+
+  cout << "DEBUG: gp configured\n";
 
   imu = new LSM9DS0(0x6B, 0x1D); //the pinout addresses of the gyro and xm, respectively
   imu -> setAccelScale(imu -> A_SCALE_2G);
@@ -110,16 +110,19 @@ int main()
   //cout << "DEBUG: filling buffer...\n";
   getData(buffSize); //fill with data, be patient.
   //cout << "DEBUG: Buffer full!\n";
- 
 
   // Loop and report data
   while (1)
   {
     getData(10);
     //cout << "DEBUG: Plotting data...\n";
-    //gp << "plot '-' using (column(0)):1 with lines"<<endl;
-    //gp.send1d(x_pts);
-    //cout << "DEBUG: latest is " << x_pts.back() << endl;
+    rename("/var/www/stage.png","/var/www/out.png");
+    gp << "set output \"/var/www/stage.png\"\n";
+    gp << "plot '-' using (column(0)):1 with lines\n";
+    gp.send1d(x_pts);
+    //gp << "plot" << gp.file1d(x_pts, "in.dat") << "with lines\n";
+
+    //cout << "DEBUG: plotted up through datapoint " << x_pts.back() << endl;
 
     //cout<<"Accel y: "<<imu->calcAccel(imu->ay)<<" g"<<endl;
     //cout<<"Accel z: "<<imu->calcAccel(imu->az)<<" g"<<endl;
