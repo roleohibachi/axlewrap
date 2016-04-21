@@ -89,7 +89,7 @@ int main()
   //Gnuplot gp(fopen("script.gp", "w"));
   Gnuplot gp("tee out.gp | gnuplot");
 
-  gp << "set terminal png\n";
+  gp << "set terminal svg\n";
 
   cout << "DEBUG: gp configured\n";
 
@@ -116,8 +116,8 @@ int main()
   {
     getData(10);
     //cout << "DEBUG: Plotting data...\n";
-    rename("/var/www/stage.png","/var/www/out.png");
-    gp << "set output \"/var/www/stage.png\"\n";
+    rename("/var/www/stage.svg","/var/www/out.svg");
+    gp << "set output \"/var/www/stage.svg\"\n";
     gp << "plot '-' using (column(0)):1 with lines\n";
     gp.send1d(x_pts);
     //gp << "plot" << gp.file1d(x_pts, "in.dat") << "with lines\n";
