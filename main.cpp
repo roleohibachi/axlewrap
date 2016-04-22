@@ -23,8 +23,8 @@ Distributed as-is; no warranty is given. Which is probably good, because I'm a r
 #include <unistd.h>
 #include "SFE_LSM9DS0.h"
 #include <fstream>
-
-#include "gnuplot-iostream.h"
+//#include <ofstream>
+//#include <chrono>
 
 using namespace std;
 
@@ -33,9 +33,20 @@ std::vector<float> x_pts(buffSize, 0.0);
 LSM9DS0 *imu;
 bool newAccelData = false;
 const uint16_t chipID = 0x49d4;
+fstream outfile;
+
+void writeData(int howMany){
+  outfile.open("out.csv", std::fstream::app);
+
+  for( auto it = (x_pts.end() - howMany); it != x_pts.end(); ++it) {
+    outfile << *it << endl;
+  }
+  outfile.close();
+  //TODO call something to tell the web end that this is ready
+}
+
 
 void getData(int howMany){
-
   bool overflow = false;
     // Of course, we may care if an overflow occurred; we can check that
     //  easily enough from an internal register on the part. There are functions
@@ -66,6 +77,10 @@ void getData(int howMany){
     //  manually as above. Also, there's no check on overflow, so you may miss
     //  a sample and not know it.
     
+    //time of sample
+    //TODO return tuples with the time,x,y
+//    cout << std::chrono::high_resolution_clock::now();
+
     // cout << "DEBUG: Pulling the hot data...\n";
     imu->readAccel();
     // cout << "DEBUG: Pulled the hot data.\n";
@@ -79,19 +94,12 @@ void getData(int howMany){
     // cout << "DEBUG: Resized the vector.\n";
   }
   cout << endl;
+  writeData(howMany);
 }
-
 
 int main()
 {
-  //Gnuplot gp(stdout);
-  //Gnuplot gp;
-  //Gnuplot gp(fopen("script.gp", "w"));
-  Gnuplot gp("tee out.gp | gnuplot");
-
-  gp << "set terminal svg\n";
-
-  cout << "DEBUG: gp configured\n";
+//TODO open file
 
   imu = new LSM9DS0(0x6B, 0x1D); //the pinout addresses of the gyro and xm, respectively
   imu -> setAccelScale(imu -> A_SCALE_2G);
@@ -117,12 +125,7 @@ int main()
     getData(10);
     //cout << "DEBUG: Plotting data...\n";
     rename("/var/www/stage.svg","/var/www/out.svg");
-    gp << "set output \"/var/www/stage.svg\"\n";
-    gp << "plot '-' using (column(0)):1 with lines\n";
-    gp.send1d(x_pts);
-    //gp << "plot" << gp.file1d(x_pts, "in.dat") << "with lines\n";
-
-    //cout << "DEBUG: plotted up through datapoint " << x_pts.back() << endl;
+//TODO write out to file
 
     //cout<<"Accel y: "<<imu->calcAccel(imu->ay)<<" g"<<endl;
     //cout<<"Accel z: "<<imu->calcAccel(imu->az)<<" g"<<endl;

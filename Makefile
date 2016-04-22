@@ -9,7 +9,7 @@ accel: SFE_LSM9DS0.o main.o
 	g++ -c SFE_LSM9DS0.cpp -o SFE_LSM9DS0.o
 
 main.o: main.cpp
-	g++ -c main.cpp -o main.o
+	g++ -std=c++11 -c main.cpp -o main.o
 
 clean:
 	rm *.o accel
